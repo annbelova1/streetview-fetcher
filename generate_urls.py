@@ -5,30 +5,47 @@
 from urllib.parse import urlencode
 import sys
 
+# The number of degrees we need to get clear signs
+FOV_DEG = 25
+# String parameter for image size - always max
+IMG_SIZE = '600x600'
+
 SV_IMG_URL = 'https://maps.googleapis.com/maps/api/streetview'
-SV_PARAMS = {
-    'size': '600x600',
-    'fov': 40
-}
 
 crawler_file = sys.argv[1]
 
 
-def generate_view_urls(pid, lat, lng):
+def generate_view_urls(pid, heading):
+    # LatLng isn't needed for these, since we have pano data
     params = {
         'pano': pid,
-        'latitude': lat,
-        'longitude': lng,
-        'size': SV_PARAMS['size'],
-        'fov': SV_PARAMS['fov']
+        'size': IMG_SIZE,
+        'fov': FOV_DEG
     }
+
+    # The lowest angle perpendicular to the heading
+    perp_heading = (float(heading) + 90) % 180
+
+    # Fan out evenly from perpendicular angle
+    fanned_headings = [
+        perp_heading - 2 * FOV_DEG,
+        perp_heading - 1 * FOV_DEG,
+        perp_heading,
+        perp_heading + 1 * FOV_DEG,
+        perp_heading + 2 * FOV_DEG
+    ]
+
+    # Add headings from opposite side of the road
+    fanned_headings += [h + 180 for h in fanned_headings]
+
     # Capture all headings at 30deg increments
-    for headingDeg in range(0, 360, 30):
-        params['heading'] = headingDeg
+    for h in fanned_headings:
+        params['heading'] = h
         print('{0}?{1}'.format(SV_IMG_URL, urlencode(params)))
 
 
 with open(crawler_file) as panoramas:
+    # Each line is laid out as pid, lat, lng, heading
     for p in panoramas:
-        pid, lat, lng = p.split()
-        generate_view_urls(pid, lat, lng)
+        pid, lat, lng, heading = p.split()
+        generate_view_urls(pid, heading)
