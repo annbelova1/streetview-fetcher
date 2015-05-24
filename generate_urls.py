@@ -5,6 +5,7 @@
 from urllib.parse import urlencode
 import sys
 
+API_KEY = open('google_maps_key.txt').read().strip() 
 # The number of degrees we need to get clear signs
 FOV_DEG = 25
 # String parameter for image size - always max
@@ -20,7 +21,8 @@ def generate_view_urls(pid, heading):
     params = {
         'pano': pid,
         'size': IMG_SIZE,
-        'fov': FOV_DEG
+        'fov': FOV_DEG,
+        'key': API_KEY
     }
 
     # The lowest angle perpendicular to the heading
