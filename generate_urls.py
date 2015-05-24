@@ -3,6 +3,7 @@
 # ...
 
 from urllib.parse import urlencode
+import sys
 
 SV_IMG_URL = 'https://maps.googleapis.com/maps/api/streetview'
 SV_PARAMS = {
@@ -10,7 +11,7 @@ SV_PARAMS = {
     'fov': 40
 }
 
-panorama_file = 'darlinghurst.txt'
+crawler_file = sys.argv[1]
 
 
 def generate_view_urls(pid, lat, lng):
@@ -27,7 +28,7 @@ def generate_view_urls(pid, lat, lng):
         print('{0}?{1}'.format(SV_IMG_URL, urlencode(params)))
 
 
-with open(panorama_file) as panoramas:
+with open(crawler_file) as panoramas:
     for p in panoramas:
         pid, lat, lng = p.split()
         generate_view_urls(pid, lat, lng)
